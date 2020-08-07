@@ -1,0 +1,266 @@
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PathFinding by Pladq</title>
+
+        <script src=
+        "https://code.jquery.com/jquery-2.2.4.min.js">
+    </script>
+</head>
+<body>
+
+<br>
+
+<h4>It Took: {{time}} sec</h4>
+
+<div id="pathFindingField">
+
+{% for t_and_p in tiles_and_path %}
+        {% if t_and_p.0 == True %}
+            <div class = "tile" style = "background-color: purple;" value = "{{t_and_p.1}}">
+
+            </div>
+
+        {%elif t_and_p.2 == True %}
+            <div class = "tile" style = "background-color: green;" value = "{{t_and_p.1}}">
+
+            </div>
+        {%elif t_and_p.3 == True %}
+            <div class = "tile" style = "background-color: red;" value = "{{t_and_p.1}}">
+
+            </div>
+        {%elif t_and_p.4 == True %}
+            <div class = "tile" style = "background-color: black;" value = "{{t_and_p.1}}">
+
+            </div>
+        {%elif t_and_p.5 == True %}
+            <div class = "tile" style = "background-color: grey;" value = "{{t_and_p.1}}">
+
+            </div>
+        {%else%}
+            <div class = "tile" style = "background-color: white;" value = "{{t_and_p.1}}">
+
+            </div>
+        {%endif%}
+
+{%endfor%}
+
+</div>
+
+<div id = "buttons">
+    <a href = ''>
+        <form method = "POST" action="{%url 'findPath' %}">
+            {% csrf_token %}
+            <input  id="empty_walls_id" type = "hidden"  name="walls" value = "">
+            <input  id="empty_start_id"  type = "hidden" name="start" value = "">
+            <input  id="empty_finish_id"  type = "hidden" name="finish" value = "">
+            <button id = "reset_button"  class = "button" type = "submit"    style = " float:right; background-color: yellow;"> RESET</button>
+        </form>
+
+    </a>
+
+
+    <button id = "start_point" class = "button" type = "submit"  style = " float:right; background-color: green;"> START</button>
+    <button id = "end_point"  class = "button" type = "submit"   style = " float:right; background-color: red;"> END</button>
+    <button id = "walls_button"  class = "button" type = "submit"   style = " float:right; background-color: grey;"> WALLS</button>
+
+
+    <form method = "POST" action="{%url 'findPath' %}">
+        {% csrf_token %}
+        <input  id="walls_id" type = "hidden" name="walls" value = "{{walls_ids}}">
+        <input  id="start_id" type = "hidden"  name="start" value = "{{start_id}}">
+        <input  id="finish_id" type = "hidden" name="finish" value = "{{finish_id}}">
+        <button id = "fin_path_button" class = "button" type = "submit"  style = " float:right; background-color: purple;" > FIND PATH!</button>
+        <div style = "float: left; font-size: 18px;">
+            Accuracy:
+        </div>
+            <input type="range" min="985" max="999" value="{{accuracy}}" class="form-control-range" id="slider" name = "accuracy">
+    </form>
+
+</div>
+
+ <input  id="msg" type = "hidden"  name="msg" value = "{{msg}}">
+
+</body>
+
+
+<script type="text/javascript">
+    var curr_color = "black";
+    var down = false;
+
+     $(window).load(function() {
+        if($("#msg").val() != "")
+        {
+            alert($("#msg").val());
+        }
+    });
+
+    // Returns a NodeList
+    var elems = document.querySelectorAll( ".tile" );
+    // Convert the NodeList to an Array
+    var tiles_arr = jQuery.makeArray( elems );
+
+
+
+    $(document).mousedown(function() {
+            down = true;
+    })
+
+    $(document).mouseup(function() {
+            down = false;
+    })
+
+    //creating walls
+    //for holding mouse button:
+    $(".tile").mouseenter(function(){
+    if(down){
+        if(curr_color == "black")
+        {
+            $(this).css("background", curr_color);      //changing color
+            var value_to_pass = this.getAttribute('value'); //saving value of tile
+            $("#walls_id").val( $("#walls_id").val() + ";" + value_to_pass)
+        }
+    }
+    })
+
+    //for singe click:
+    $(".tile").on("click", function() {
+        if(curr_color == "black")
+        {
+            $(this).css("background", curr_color);
+            var value_to_pass = this.getAttribute('value'); //saving value of tile
+            $("#walls_id").val( $("#walls_id").val() + ";" + value_to_pass)
+        }
+    })
+
+    //for singe click:
+    $(".tile").on("click", function() {
+        if(curr_color == "green")
+        {
+            if($("#start_id").val()=="-1")
+            {
+                $(this).css("background", curr_color);
+                var value_to_pass = this.getAttribute('value'); //saving value of tile
+                $("#start_id").val( value_to_pass )
+            }
+        }else if(curr_color == "red")
+        {
+        if($("#finish_id").val()=="-1")
+            {
+                $(this).css("background", curr_color);
+                var value_to_pass = this.getAttribute('value'); //saving value of tile
+                $("#finish_id").val( value_to_pass)
+            }
+        }
+    })
+
+
+    //chossing a start point
+    $(function() {
+      $("#start_point").click( function()
+           {
+             curr_color = "green";
+           }
+      );
+    });
+
+    //chossing an end point
+    $(function() {
+      $("#end_point").click( function()
+           {
+            curr_color = "red";
+           }
+      );
+    });
+
+     //chossing  walls
+    $(function() {
+      $("#walls_button").click( function()
+           {
+            curr_color = "black";
+           }
+      );
+    });
+
+
+
+
+
+</script>
+
+
+
+<style>
+
+body{
+    margin: 0 auto;
+    max-width:1360px;
+}
+
+h4{
+    color:green;
+    margin: 0px;
+}
+
+#pathFindingField{
+    background-color:black;
+    width:1360px;
+    position: fixed;
+    padding: 1%;
+
+}
+
+.tile{
+    background-color:white;
+    height:20px;
+    width:20px;
+    float:left;
+}
+
+#buttons{
+    width:510px;
+    height: 30px;
+    padding: 1%;
+    position: fixed;
+    margin-left:425px;
+    margin-top: 900px;
+}
+
+.button{
+    height:20px;
+    width: 100px;
+    border: 1px solid black;
+    margin:1px;
+}
+
+
+</style>
+</html>
+<script>
+USUWANIE SCIAN ALE NIE UZYWAM BO POTEM BD PROBLEM  Z PATHFINDINGIEM:
+
+<button id = "rubber_button"  type = "submit"   style = " float:right; background-color: grey;"> Delete</button>
+
+//deleteing points by sigle click
+    $(function() {
+      $("#rubber_button").click( function()
+           {
+            curr_color = "white";
+           }
+      );
+    });
+
+    //deleteing points by holding mouse button
+    $(".tile").mouseenter(function(){
+    if(down){
+        if(curr_color == "white")    //bo wtedy usuwam duzo scian xd
+        {
+            $(this).css("background", curr_color);      //changing color
+            var div_value = this.getAttribute('value'); //saving value of tile
+            $("#deleted_walls_div_holder").html($("#deleted_walls_div_holder").html() + ";"+div_value);
+        }
+    }
+    })
+
+</script>
