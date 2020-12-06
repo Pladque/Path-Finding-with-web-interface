@@ -6,4 +6,4 @@ What i've learned:
 
 - Basics of jQuery
 
-- Mastered alghoritms implementation skills
+- Developed alghoritms implementation skills
